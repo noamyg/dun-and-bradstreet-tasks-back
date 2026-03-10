@@ -29,7 +29,11 @@ public class TaskEntity
         if (newStatus < 1)
             throw new DomainException("Status must be a positive integer.");
 
-        if (newStatus > Status + 1)
-            throw new DomainException($"Cannot jump from status {Status} to {newStatus}.");
+        if (newStatus == Status)
+            throw new DomainException($"Task is already at status {Status}.");
+
+        var distance = Math.Abs(newStatus - Status);
+        if (distance > 1)
+            throw new DomainException($"Cannot jump from status {Status} to {newStatus}. Only single-step transitions are allowed.");
     }
 }
