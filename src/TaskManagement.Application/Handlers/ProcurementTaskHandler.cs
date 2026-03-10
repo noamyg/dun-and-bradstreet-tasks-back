@@ -26,29 +26,19 @@ public class ProcurementTaskHandler : TaskTypeHandlerBase, ITaskTypeHandler
 
     public void ApplyStatusData(TaskEntity task, int newStatus, Dictionary<string, string> statusData)
     {
-        var data = task.ProcurementData!;
-
         if (newStatus == (int)Status.SupplierOffersReceived)
         {
-            data.PriceQuote1 = statusData["priceQuote1"];
-            data.PriceQuote2 = statusData["priceQuote2"];
+            task.TypeData["priceQuote1"] = statusData["priceQuote1"];
+            task.TypeData["priceQuote2"] = statusData["priceQuote2"];
         }
         else if (newStatus == (int)Status.PurchaseCompleted)
         {
-            data.Receipt = statusData["receipt"];
+            task.TypeData["receipt"] = statusData["receipt"];
         }
     }
 
-    public void InitializeData(TaskEntity task)
-    {
-        task.ProcurementData = new ProcurementTaskData();
-    }
+    public void InitializeData(TaskEntity task) { }
 
     public object? GetResponseData(TaskEntity task) =>
-        task.ProcurementData is null ? null : new
-        {
-            task.ProcurementData.PriceQuote1,
-            task.ProcurementData.PriceQuote2,
-            task.ProcurementData.Receipt
-        };
+        task.TypeData.Count == 0 ? null : task.TypeData;
 }

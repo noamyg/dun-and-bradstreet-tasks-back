@@ -47,3 +47,15 @@ Swagger UI is available at `https://localhost:{port}/swagger`.
 | Development | `2` | 1 (Created) -> 2 (Spec Done) -> 3 (Dev Done) -> 4 (Distributed) |
 
 Each status transition requires specific data fields in the `statusData` dictionary (e.g. price quotes for procurement status 2, branch name for dev status 3).
+
+## Adding a New Task Type
+
+The architecture follows the Open/Closed Principle — adding a new task type requires **no changes to existing code**. Type-specific data is stored as a single JSON column (`TypeData`) on the task entity, and handlers are auto-discovered via assembly scanning.
+
+To add a new task type:
+
+1. Add a value to the `TaskType` enum (e.g. `Support = 3`).
+2. Create a handler class that extends `TaskTypeHandlerBase` and implements `ITaskTypeHandler` — define the status flow, field validation, and how data is applied.
+3. Run `dotnet ef migrations add <Name>` (only if the enum storage needs updating; no schema change is needed for the type-specific data itself since it lives in the JSON column).
+
+That's it. No changes to `TaskEntity`, `AppDbContext`, `TaskRepository`, DI registration, or any existing handler.

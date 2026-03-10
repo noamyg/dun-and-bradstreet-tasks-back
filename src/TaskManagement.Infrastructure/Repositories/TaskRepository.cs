@@ -29,8 +29,6 @@ public class TaskRepository : ITaskRepository
     private IQueryable<TaskEntity> TasksWithAllIncludes() =>
         _db.Tasks
             .Include(t => t.AssignedUser)
-            .Include(t => t.ProcurementData)
-            .Include(t => t.DevelopmentData)
             .Include(t => t.StatusHistory)
                 .ThenInclude(h => h.AssignedUser);
 }

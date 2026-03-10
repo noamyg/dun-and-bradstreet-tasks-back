@@ -1,4 +1,6 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using TaskManagement.Domain.Entities;
 
 namespace TaskManagement.Infrastructure.Data;
@@ -9,8 +11,6 @@ public class AppDbContext : DbContext
 
     public DbSet<User> Users => Set<User>();
     public DbSet<TaskEntity> Tasks => Set<TaskEntity>();
-    public DbSet<ProcurementTaskData> ProcurementTaskData => Set<ProcurementTaskData>();
-    public DbSet<DevelopmentTaskData> DevelopmentTaskData => Set<DevelopmentTaskData>();
     public DbSet<TaskStatusHistory> TaskStatusHistories => Set<TaskStatusHistory>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -34,40 +34,22 @@ public class AppDbContext : DbContext
             e.Property(t => t.IsClosed).IsRequired();
             e.Property(t => t.CreatedAt).IsRequired();
 
+            e.Property(t => t.TypeData)
+             .HasConversion(
+                 v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                 v => JsonSerializer.Deserialize<Dictionary<string, string>>(v, (JsonSerializerOptions?)null)
+                     ?? new Dictionary<string, string>())
+             .HasColumnType("nvarchar(max)")
+             .Metadata.SetValueComparer(new ValueComparer<Dictionary<string, string>>(
+                 (a, b) => JsonSerializer.Serialize(a, (JsonSerializerOptions?)null)
+                        == JsonSerializer.Serialize(b, (JsonSerializerOptions?)null),
+                 v => v.Aggregate(0, (hash, kvp) => HashCode.Combine(hash, kvp.Key.GetHashCode(), kvp.Value.GetHashCode())),
+                 v => v.ToDictionary(kvp => kvp.Key, kvp => kvp.Value)));
+
             e.HasOne(t => t.AssignedUser)
              .WithMany(u => u.AssignedTasks)
              .HasForeignKey(t => t.AssignedUserId)
              .OnDelete(DeleteBehavior.Restrict);
-        });
-
-        modelBuilder.Entity<ProcurementTaskData>(e =>
-        {
-            e.ToTable("ProcurementTaskData");
-            e.HasKey(d => d.TaskId);
-
-            e.HasOne(d => d.Task)
-             .WithOne(t => t.ProcurementData)
-             .HasForeignKey<ProcurementTaskData>(d => d.TaskId)
-             .OnDelete(DeleteBehavior.Cascade);
-
-            e.Property(d => d.PriceQuote1).HasMaxLength(500);
-            e.Property(d => d.PriceQuote2).HasMaxLength(500);
-            e.Property(d => d.Receipt).HasMaxLength(500);
-        });
-
-        modelBuilder.Entity<DevelopmentTaskData>(e =>
-        {
-            e.ToTable("DevelopmentTaskData");
-            e.HasKey(d => d.TaskId);
-
-            e.HasOne(d => d.Task)
-             .WithOne(t => t.DevelopmentData)
-             .HasForeignKey<DevelopmentTaskData>(d => d.TaskId)
-             .OnDelete(DeleteBehavior.Cascade);
-
-            e.Property(d => d.SpecificationText).HasMaxLength(4000);
-            e.Property(d => d.BranchName).HasMaxLength(200);
-            e.Property(d => d.VersionNumber).HasMaxLength(50);
         });
 
         modelBuilder.Entity<TaskStatusHistory>(e =>

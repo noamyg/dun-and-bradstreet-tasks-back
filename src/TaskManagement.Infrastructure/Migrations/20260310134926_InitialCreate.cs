@@ -5,8 +5,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace TaskManagement.Infrastructure.Migrations
 {
+    /// <inheritdoc />
     public partial class InitialCreate : Migration
     {
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -33,7 +35,8 @@ namespace TaskManagement.Infrastructure.Migrations
                     Status = table.Column<int>(type: "int", nullable: false),
                     IsClosed = table.Column<bool>(type: "bit", nullable: false),
                     AssignedUserId = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    TypeData = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -44,46 +47,6 @@ namespace TaskManagement.Infrastructure.Migrations
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "DevelopmentTaskData",
-                columns: table => new
-                {
-                    TaskId = table.Column<int>(type: "int", nullable: false),
-                    SpecificationText = table.Column<string>(type: "nvarchar(4000)", maxLength: 4000, nullable: true),
-                    BranchName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    VersionNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_DevelopmentTaskData", x => x.TaskId);
-                    table.ForeignKey(
-                        name: "FK_DevelopmentTaskData_Tasks_TaskId",
-                        column: x => x.TaskId,
-                        principalTable: "Tasks",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ProcurementTaskData",
-                columns: table => new
-                {
-                    TaskId = table.Column<int>(type: "int", nullable: false),
-                    PriceQuote1 = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    PriceQuote2 = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    Receipt = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ProcurementTaskData", x => x.TaskId);
-                    table.ForeignKey(
-                        name: "FK_ProcurementTaskData_Tasks_TaskId",
-                        column: x => x.TaskId,
-                        principalTable: "Tasks",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -137,14 +100,9 @@ namespace TaskManagement.Infrastructure.Migrations
                 unique: true);
         }
 
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "DevelopmentTaskData");
-
-            migrationBuilder.DropTable(
-                name: "ProcurementTaskData");
-
             migrationBuilder.DropTable(
                 name: "TaskStatusHistory");
 

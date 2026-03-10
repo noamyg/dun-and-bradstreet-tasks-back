@@ -14,8 +14,7 @@ public class TaskEntity
 
     public DateTime CreatedAt { get; set; }
 
-    public ProcurementTaskData? ProcurementData { get; set; }
-    public DevelopmentTaskData? DevelopmentData { get; set; }
+    public Dictionary<string, string> TypeData { get; set; } = new();
 
     public ICollection<TaskStatusHistory> StatusHistory { get; set; } = new List<TaskStatusHistory>();
 

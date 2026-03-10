@@ -1,5 +1,4 @@
 using Microsoft.Extensions.DependencyInjection;
-using TaskManagement.Application.Handlers;
 using TaskManagement.Application.Interfaces;
 using TaskManagement.Application.Services;
 
@@ -12,8 +11,13 @@ public static class DependencyInjection
         services.AddAutoMapper(typeof(DependencyInjection).Assembly);
         services.AddScoped<ITaskService, TaskService>();
         services.AddScoped<IUserService, UserService>();
-        services.AddScoped<ITaskTypeHandler, ProcurementTaskHandler>();
-        services.AddScoped<ITaskTypeHandler, DevelopmentTaskHandler>();
+
+        var handlerTypes = typeof(DependencyInjection).Assembly.GetTypes()
+            .Where(t => t is { IsAbstract: false, IsInterface: false }
+                        && typeof(ITaskTypeHandler).IsAssignableFrom(t));
+
+        foreach (var type in handlerTypes)
+            services.AddScoped(typeof(ITaskTypeHandler), type);
 
         return services;
     }

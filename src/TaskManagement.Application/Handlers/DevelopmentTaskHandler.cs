@@ -23,26 +23,16 @@ public class DevelopmentTaskHandler : TaskTypeHandlerBase, ITaskTypeHandler
 
     public void ApplyStatusData(TaskEntity task, int newStatus, Dictionary<string, string> statusData)
     {
-        var data = task.DevelopmentData!;
-
         if (newStatus == (int)Status.SpecificationCompleted)
-            data.SpecificationText = statusData["specificationText"];
+            task.TypeData["specificationText"] = statusData["specificationText"];
         else if (newStatus == (int)Status.DevelopmentCompleted)
-            data.BranchName = statusData["branchName"];
+            task.TypeData["branchName"] = statusData["branchName"];
         else if (newStatus == (int)Status.DistributionCompleted)
-            data.VersionNumber = statusData["versionNumber"];
+            task.TypeData["versionNumber"] = statusData["versionNumber"];
     }
 
-    public void InitializeData(TaskEntity task)
-    {
-        task.DevelopmentData = new DevelopmentTaskData();
-    }
+    public void InitializeData(TaskEntity task) { }
 
     public object? GetResponseData(TaskEntity task) =>
-        task.DevelopmentData is null ? null : new
-        {
-            task.DevelopmentData.SpecificationText,
-            task.DevelopmentData.BranchName,
-            task.DevelopmentData.VersionNumber
-        };
+        task.TypeData.Count == 0 ? null : task.TypeData;
 }
